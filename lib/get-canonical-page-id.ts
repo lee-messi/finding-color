@@ -1,11 +1,3 @@
-import { ExtendedRecordMap } from 'notion-types'
-import {
-  parsePageId,
-  getCanonicalPageId as getCanonicalPageIdImpl
-} from 'notion-utils'
-
-import { inversePageUrlOverrides } from './config'
-
 export function getCanonicalPageId(
   pageId: string,
   recordMap: ExtendedRecordMap,
@@ -20,8 +12,12 @@ export function getCanonicalPageId(
   if (override) {
     return override
   } else {
-    return getCanonicalPageIdImpl(pageId, recordMap, {
+    // 1. Try to get the canonical ID (slug)
+    const canonicalId = getCanonicalPageIdImpl(pageId, recordMap, {
       uuid
     })
+
+    // 2. If it's missing (which it is in your case), use the cleanPageId instead
+    return canonicalId || cleanPageId
   }
 }
