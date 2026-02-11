@@ -60,7 +60,8 @@ export const defaultMapImageUrl = (url: string, block: Block) => {
 }
 
 export const defaultMapPageUrl = (rootPageId?: string) => (pageId: string) => {
-  pageId = (pageId || '').replace(/-/g, '')
+  if (!pageId) return '' // Add this line
+  pageId = pageId.replace(/-/g, '')
 
   if (rootPageId && pageId === rootPageId) {
     return '/'
@@ -115,7 +116,7 @@ export const getListNumber = (blockId: string, blockMap: BlockMap) => {
 }
 
 export const getHashFragmentValue = (url: string) => {
-  return url.includes('#') ? url.replace(/^.+(#.+)$/, '$1') : ''
+  return url?.includes('#') ? url.replace(/^.+(#.+)$/, '$1') : ''
 }
 
 export const isBrowser = typeof window !== 'undefined'
@@ -129,6 +130,7 @@ const youtubeDomains = new Set([
 ])
 
 export const getYoutubeId = (url: string): string | null => {
+  if (!url) return null // Add this line
   try {
     const { hostname } = new URL(url)
     if (!youtubeDomains.has(hostname)) {
