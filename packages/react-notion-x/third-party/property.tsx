@@ -178,7 +178,7 @@ export const PropertyImpl: React.FC<IPropertyProps> = props => {
         if (inline) {
           try {
             const url = new URL(d[0][0]);
-            d[0][0] = url.hostname.replace(/^www\./, '');
+            d[0][0] = url.hostname?.replace(/^www\./, '') || '';
           } catch (err) {
             // ignore invalid urls
           }

@@ -215,7 +215,7 @@ export class SearchDialog extends React.Component<{
           }
 
           if (result.highlight?.text) {
-            result.highlight.html = result.highlight.text
+            result.highlight.html = (result.highlight.text || '')
               .replace(/<gzkNfoUU>/gi, '<b>')
               .replace(/<\/gzkNfoUU>/gi, '</b>');
           }

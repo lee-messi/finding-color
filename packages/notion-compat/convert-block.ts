@@ -344,7 +344,10 @@ export function convertBlock({
         switch (u.hostname) {
           case 'loom.com':
           case 'www.loom.com':
-            u.pathname = u.pathname.replace(/^\/share\//i, '/embed/')
+            // To this:
+            if (u.pathname) {
+              u.pathname = u.pathname.replace(/^\/share\//i, '/embed/')
+            }
             compatBlock.format.display_source = u.toString()
             break
         }

@@ -289,16 +289,16 @@ function evalFunctionFormula(
       return (evalFormula(args[0], ctx) as string).length;
 
     case 'replace': {
-      const value = evalFormula(args[0], ctx) as string;
-      const regex = evalFormula(args[1], ctx) as string;
-      const replacement = evalFormula(args[2], ctx) as string;
+      const value = (evalFormula(args[0], ctx) as string) || ''; // Added || ''
+      const regex = (evalFormula(args[1], ctx) as string) || '';
+      const replacement = (evalFormula(args[2], ctx) as string) || '';
       return value.replace(new RegExp(regex), replacement);
     }
 
     case 'replaceAll': {
-      const value = evalFormula(args[0], ctx) as string;
-      const regex = evalFormula(args[1], ctx) as string;
-      const replacement = evalFormula(args[2], ctx) as string;
+      const value = (evalFormula(args[0], ctx) as string) || ''; // Added || ''
+      const regex = (evalFormula(args[1], ctx) as string) || '';
+      const replacement = (evalFormula(args[2], ctx) as string) || '';
       return value.replace(new RegExp(regex, 'g'), replacement);
     }
 
@@ -355,7 +355,8 @@ function evalFunctionFormula(
 
     case 'formatDate': {
       const date = evalFormula(args[0], ctx) as Date;
-      const formatValue = (evalFormula(args[1], ctx) as string).replace('dddd', 'eeee');
+      const formatValue = ((evalFormula(args[1], ctx) as string) || '').replace('dddd', 'eeee'); // Added ( ... || '')
+      if (!date) return ''; // Add this safety check too
       return format(date, formatValue);
     }
 
