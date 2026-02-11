@@ -6,6 +6,40 @@ import pMap from 'p-map';
 
 import * as types from './types';
 
+// Normalize nested value structure from Notion API
+// Some blocks/collections come as { value: { value: {...}, role: "..." } }
+function normalizeRecordMap(recordMap: notion.ExtendedRecordMap): void {
+  for (const id in recordMap.block) {
+    const blockData = recordMap.block[id];
+    if (blockData.value?.value) {
+      recordMap.block[id] = {
+        ...blockData,
+        value: blockData.value.value
+      };
+    }
+  }
+
+  for (const id in recordMap.collection) {
+    const collectionData = recordMap.collection[id];
+    if (collectionData.value?.value) {
+      recordMap.collection[id] = {
+        ...collectionData,
+        value: collectionData.value.value
+      };
+    }
+  }
+
+  for (const id in recordMap.collection_view) {
+    const viewData = recordMap.collection_view[id];
+    if (viewData.value?.value) {
+      recordMap.collection_view[id] = {
+        ...viewData,
+        value: viewData.value.value
+      };
+    }
+  }
+}
+
 /**
  * Main Notion API client.
  */
@@ -67,6 +101,9 @@ export class NotionAPI {
       throw new Error(`Notion page not found "${uuidToId(pageId)}"`);
     }
 
+    // Normalize initial recordMap
+    normalizeRecordMap(recordMap);
+
     // CUSTOM: 작성자 유저 정보 가져오도록 처리
     const pageBlockId = Object.keys(recordMap.block)[0];
     const pageBlock = recordMap.block[pageBlockId].value;
@@ -100,11 +137,10 @@ export class NotionAPI {
           break;
         }
 
-        const newBlocks = await this.getBlocks(pendingBlockIds, gotOptions).then(
-          res => res.recordMap.block,
-        );
+        const newBlocksResponse = await this.getBlocks(pendingBlockIds, gotOptions);
+        normalizeRecordMap(newBlocksResponse.recordMap);
 
-        recordMap.block = { ...recordMap.block, ...newBlocks };
+        recordMap.block = { ...recordMap.block, ...newBlocksResponse.recordMap.block };
       }
     }
 
@@ -158,6 +194,9 @@ export class NotionAPI {
             //   `${collectionId}-${collectionViewId}.json`,
             //   JSON.stringify(collectionData.result, null, 2)
             // )
+
+            // Normalize collection data before merging
+            normalizeRecordMap(collectionData.recordMap);
 
             recordMap.block = {
               ...recordMap.block,
