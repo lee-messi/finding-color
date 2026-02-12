@@ -4,7 +4,7 @@
 }
 
 // 반응형 처리
-@media only screen and (max-width: 1500px) {
+@media only screen and (max-width: 1300px) {
   :root {
     --notion-page-left-right-padding: 8vw;
     --notion-page-fullwith-left-right-padding: 8vw;
@@ -598,32 +598,11 @@ body {
     padding-left: 0 !important;
   }
 
-  // 보드 뷰 - 그룹 컬럼 색상 배경
-  .notion-board-th[data-group-color] {
-    border-radius: 8px 8px 0 0;
-    padding: 4px 6px;
-  }
-
-  .notion-board-group[data-group-color] {
-    border-radius: 0 0 8px 8px;
-    padding: 6px;
-  }
-
-  .notion-board-group[data-group-color] .notion-board-group-card {
-    border-radius: 6px;
-  }
-
+  // 보드 뷰 - 카드별 색상 배경
   @each $color in default, blue, orange, green, pink, brown, red, yellow, purple, gray {
-    .notion-board-th[data-group-color='#{$color}'] {
-      background: var(--notion-board-#{$color});
-    }
-
-    .notion-board-group[data-group-color='#{$color}'] {
-      background: var(--notion-board-#{$color});
-    }
-
     .notion-board-group[data-group-color='#{$color}'] .notion-board-group-card {
       background: var(--notion-board-card-#{$color});
+      border-radius: 6px;
     }
   }
 
