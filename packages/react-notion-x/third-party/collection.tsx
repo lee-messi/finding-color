@@ -168,26 +168,32 @@ const CollectionViewBlock: React.FC<{
     };
   }
 
+  const hasTitle = !!title;
+  const hasViewDropdown = viewIds.length > 1 && showCollectionViewDropdown;
+  const showHeader = hasTitle || hasViewDropdown;
+
   return (
     <div className={cs('notion-collection', className)}>
-      <div className="notion-collection-header" style={style}>
-        {title && (
-          <div className="notion-collection-header-title">
-            <PageIcon block={block} className="notion-page-title-icon" hideDefaultIcon />
+      {showHeader && (
+        <div className="notion-collection-header" style={style}>
+          {hasTitle && (
+            <div className="notion-collection-header-title">
+              <PageIcon block={block} className="notion-page-title-icon" hideDefaultIcon />
 
-            {title}
-          </div>
-        )}
+              {title}
+            </div>
+          )}
 
-        {viewIds.length > 1 && showCollectionViewDropdown && (
-          <CollectionViewDropdownMenu
-            collectionView={collectionView}
-            collectionViewId={collectionViewId}
-            viewIds={viewIds}
-            onChangeView={onChangeView}
-          />
-        )}
-      </div>
+          {hasViewDropdown && (
+            <CollectionViewDropdownMenu
+              collectionView={collectionView}
+              collectionViewId={collectionViewId}
+              viewIds={viewIds}
+              onChangeView={onChangeView}
+            />
+          )}
+        </div>
+      )}
 
       <CollectionView
         collection={collection}
