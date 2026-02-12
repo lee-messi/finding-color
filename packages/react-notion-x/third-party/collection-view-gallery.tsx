@@ -36,14 +36,14 @@ function Gallery({ blockIds, collectionView, collection }) {
   const { recordMap } = useNotionContext();
   const {
     gallery_cover = { type: 'none' },
-    gallery_cover_size = 'medium',
+    gallery_cover_size = 'small',
     gallery_cover_aspect = 'cover',
   } = collectionView.format || {};
 
   return (
     <div className="">
       <div className="postListWrap">
-        <div className={'postList'}>
+        <div className={cs('postList', `postList-size-${gallery_cover_size}`)}>
           {blockIds?.map(blockId => {
             const block = recordMap.block[blockId]?.value as PageBlock;
             if (!block) return null;
