@@ -137,7 +137,7 @@ export const Block: React.FC<BlockProps> = props => {
           const isBlogPost = block?.type === 'page' && block?.parent_table === 'collection';
 
           const hasToc = showTableOfContents && toc.length >= minTableOfContentsItems;
-          const hasAside = hasToc || pageAside;
+          const hasAside = !!(hasToc || pageAside);
           const hasPageCover = pageCover || page_cover;
 
           return (
