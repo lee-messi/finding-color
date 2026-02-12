@@ -13,6 +13,11 @@ import { useNotionContext } from '../context'
 
 const defaultBlockIds = []
 
+function getGroupColor(schema: any, groupValue: string | undefined): string | undefined {
+  if (!schema?.options || !groupValue) return undefined
+  return schema.options.find((o: any) => o.value === groupValue)?.color
+}
+
 export const CollectionViewBoard: React.FC<CollectionViewProps> = ({
   collection,
   collectionView,
@@ -195,9 +200,10 @@ function Board({ collectionView, collectionData, collection, padding }) {
 
                 const label = p?.value?.value ?? UNCAT
                 const count = groupedBlocks[label]?.length || 0
+                const color = getGroupColor(schema, p?.value?.value)
 
                 return (
-                  <div className='notion-board-th' key={index}>
+                  <div className='notion-board-th' key={index} data-group-color={color}>
                     <div className='notion-board-th-body'>
                       {p?.value?.value ? (
                         <Property
@@ -231,9 +237,10 @@ function Board({ collectionView, collectionData, collection, padding }) {
 
               const label = p?.value?.value ?? UNCAT
               const blockIds = groupedBlocks[label] || []
+              const color = getGroupColor(schema, p?.value?.value)
 
               return (
-                <div className='notion-board-group' key={index}>
+                <div className='notion-board-group' key={index} data-group-color={color}>
                   {blockIds.map((blockId: string) => {
                     const block = recordMap.block[blockId]
                       ?.value as PageBlock
@@ -316,8 +323,10 @@ function Board({ collectionView, collectionData, collection, padding }) {
                 return null
               }
 
+              const color = getGroupColor(schema, group.value?.value)
+
               return (
-                <div className='notion-board-th' key={index}>
+                <div className='notion-board-th' key={index} data-group-color={color}>
                   <div className='notion-board-th-body'>
                     {group.value?.value ? (
                       <Property
@@ -357,8 +366,10 @@ function Board({ collectionView, collectionData, collection, padding }) {
               return null
             }
 
+            const color = getGroupColor(schema, p?.value?.value)
+
             return (
-              <div className='notion-board-group' key={index}>
+              <div className='notion-board-group' key={index} data-group-color={color}>
                 {group.blockIds?.map((blockId: string) => {
                   const block = recordMap.block[blockId]
                     ?.value as PageBlock
