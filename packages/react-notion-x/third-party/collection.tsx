@@ -75,7 +75,13 @@ const CollectionViewBlock: React.FC<{
     setIsMounted(true);
   }, []);
 
-  const defaultCollectionViewId = viewIds[0];
+  // Prefer gallery > board > first view as default
+  const preferredViewOrder = ['gallery', 'board'];
+  const defaultCollectionViewId =
+    viewIds.find(id => {
+      const view = recordMap.collection_view[id]?.value;
+      return view && preferredViewOrder.includes(view.type);
+    }) || viewIds[0];
   const [collectionState, setCollectionState] = useLocalStorage(block.id, {
     collectionViewId: defaultCollectionViewId,
   });
@@ -263,7 +269,7 @@ const CollectionViewColumnDesc: React.FC<{
   children?: React.ReactNode;
 }> = ({ collectionView, className, children, ...rest }) => {
   const { type } = collectionView;
-  const name = collectionView.name || viewTypeLabels[type] || `${type[0].toUpperCase()}${type.slice(1)} view`;
+  const name = viewTypeLabels[type] || collectionView.name || `${type[0].toUpperCase()}${type.slice(1)} view`;
 
   return (
     <div className={cs('notion-collection-view-type', className)} {...rest}>

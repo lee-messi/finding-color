@@ -459,9 +459,14 @@ body {
     fill: var(--fg-color);
   }
 
-  // 페이지 링크 스타일
+  // 페이지 링크 스타일 — 밑줄 제거
   .notion-page-title-text {
     border-bottom: none;
+  }
+
+  // 컬렉션 카드 내 관계형 속성 등에서도 밑줄 제거
+  .notion-collection-card-property .notion-page-title-text {
+    border-bottom: none !important;
   }
 
   // 링크
