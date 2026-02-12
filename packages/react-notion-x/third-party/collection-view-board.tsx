@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { PageBlock } from 'notion-types'
+import { getTextContent } from 'notion-utils'
 
 import { CollectionCard } from './collection-card'
 import { CollectionGroup } from './collection-group'
@@ -68,6 +69,8 @@ function Board({ collectionView, collectionData, collection, padding }) {
     []
 
   const hasBoardData = !!(collectionData as any).board_columns?.results
+  const groupByProperty =
+    collectionView?.format?.board_columns_by?.property
 
   const boardStyle = React.useMemo(
     () => ({
@@ -76,7 +79,134 @@ function Board({ collectionView, collectionData, collection, padding }) {
     [padding]
   )
 
-  // Fallback: when board_columns data is missing, render items as a card grid
+  // Client-side grouping: when board_columns API data is missing,
+  // group blocks by their property value locally
+  if (!hasBoardData && groupByProperty && boardGroups.length > 0) {
+    const allBlockIds: string[] =
+      (collectionData as any)['collection_group_results']?.blockIds ||
+      (collectionData as any).blockIds ||
+      defaultBlockIds
+
+    // Build a map: groupLabel -> blockIds[]
+    const groupedBlocks: Record<string, string[]> = {}
+    for (const bg of boardGroups) {
+      const label = bg?.value?.value || '__uncategorized__'
+      groupedBlocks[label] = []
+    }
+
+    for (const blockId of allBlockIds) {
+      const block = recordMap.block[blockId]?.value as PageBlock
+      if (!block) continue
+
+      const propValue = getTextContent(
+        block.properties?.[groupByProperty]
+      )
+
+      let matched = false
+      for (const bg of boardGroups) {
+        const label = bg?.value?.value || '__uncategorized__'
+        if (propValue === (bg?.value?.value || '')) {
+          groupedBlocks[label] = groupedBlocks[label] || []
+          groupedBlocks[label].push(blockId)
+          matched = true
+          break
+        }
+      }
+
+      if (!matched) {
+        // Put in uncategorized
+        const uncatKey = '__uncategorized__'
+        groupedBlocks[uncatKey] = groupedBlocks[uncatKey] || []
+        groupedBlocks[uncatKey].push(blockId)
+      }
+    }
+
+    return (
+      <div className='notion-board'>
+        <div
+          className={cs(
+            'notion-board-view',
+            `notion-board-view-size-${board_cover_size}`
+          )}
+          style={boardStyle}
+        >
+          <div className='notion-board-header'>
+            <div className='notion-board-header-inner'>
+              {boardGroups.map((p, index) => {
+                const schema = collection.schema[p.property]
+                if (!schema || p.hidden) return null
+
+                const label = p?.value?.value || '__uncategorized__'
+                const count = groupedBlocks[label]?.length || 0
+
+                return (
+                  <div className='notion-board-th' key={index}>
+                    <div className='notion-board-th-body'>
+                      {p?.value?.value ? (
+                        <Property
+                          schema={schema}
+                          data={[[p.value.value]]}
+                          collection={collection}
+                        />
+                      ) : (
+                        <span>
+                          <EmptyIcon className='notion-board-th-empty' />{' '}
+                          No Select
+                        </span>
+                      )}
+
+                      <span className='notion-board-th-count'>
+                        {count}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className='notion-board-header-placeholder' />
+
+          <div className='notion-board-body'>
+            {boardGroups.map((p, index) => {
+              const schema = collection.schema[p.property]
+              if (!schema || p.hidden) return null
+
+              const label = p?.value?.value || '__uncategorized__'
+              const blockIds = groupedBlocks[label] || []
+
+              return (
+                <div className='notion-board-group' key={index}>
+                  {blockIds.map((blockId: string) => {
+                    const block = recordMap.block[blockId]
+                      ?.value as PageBlock
+                    if (!block) return null
+
+                    return (
+                      <CollectionCard
+                        className='notion-board-group-card'
+                        collection={collection}
+                        block={block}
+                        cover={board_cover}
+                        coverSize={board_cover_size}
+                        coverAspect={board_cover_aspect}
+                        properties={
+                          collectionView.format?.board_properties
+                        }
+                        key={blockId}
+                      />
+                    )
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Fallback: no board columns definition at all — render flat card grid
   if (!hasBoardData) {
     const blockIds =
       (collectionData as any)['collection_group_results']?.blockIds ||
@@ -108,6 +238,7 @@ function Board({ collectionView, collectionData, collection, padding }) {
     )
   }
 
+  // Original path: when API provides board_columns data
   return (
     <div className='notion-board'>
       <div
@@ -120,9 +251,8 @@ function Board({ collectionView, collectionData, collection, padding }) {
         <div className='notion-board-header'>
           <div className='notion-board-header-inner'>
             {boardGroups.map((p, index) => {
-              const group = (collectionData as any).board_columns.results![
-                index
-              ]
+              const group = (collectionData as any).board_columns
+                .results![index]
               const schema = collection.schema[p.property]
 
               if (!group || !schema || p.hidden) {
@@ -145,7 +275,9 @@ function Board({ collectionView, collectionData, collection, padding }) {
                       </span>
                     )}
 
-                    <span className='notion-board-th-count'>{group.total}</span>
+                    <span className='notion-board-th-count'>
+                      {group.total}
+                    </span>
                   </div>
                 </div>
               )
@@ -158,8 +290,10 @@ function Board({ collectionView, collectionData, collection, padding }) {
         <div className='notion-board-body'>
           {boardGroups.map((p, index) => {
             const schema = collection.schema[p.property]
+            const groupType = p?.value?.type || 'select'
+            const groupLabel = p?.value?.value || 'uncategorized'
             const group = (collectionData as any)[
-              `results:select:${p?.value?.value || 'uncategorized'}`
+              `results:${groupType}:${groupLabel}`
             ]
 
             if (!group || !schema || p.hidden) {
@@ -169,7 +303,8 @@ function Board({ collectionView, collectionData, collection, padding }) {
             return (
               <div className='notion-board-group' key={index}>
                 {group.blockIds?.map((blockId: string) => {
-                  const block = recordMap.block[blockId]?.value as PageBlock
+                  const block = recordMap.block[blockId]
+                    ?.value as PageBlock
                   if (!block) return null
 
                   return (
@@ -180,7 +315,9 @@ function Board({ collectionView, collectionData, collection, padding }) {
                       cover={board_cover}
                       coverSize={board_cover_size}
                       coverAspect={board_cover_aspect}
-                      properties={collectionView.format?.board_properties}
+                      properties={
+                        collectionView.format?.board_properties
+                      }
                       key={blockId}
                     />
                   )

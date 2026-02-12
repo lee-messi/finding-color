@@ -401,10 +401,12 @@ export class NotionAPI {
       };
     }
 
-    if (groupBy) {
+    if (groupBy && !isBoardType) {
+      // Board views: skip the complex grouped reducer (Notion API returns 400).
+      // The Board component groups data client-side instead.
       const groups =
         collectionView?.format?.board_columns || collectionView?.format?.collection_groups || [];
-      const iterators = [isBoardType ? 'board' : 'group_aggregation', 'results'];
+      const iterators = ['group_aggregation', 'results'];
       const operators = {
         checkbox: 'checkbox_is',
         url: 'string_starts_with',
@@ -417,10 +419,11 @@ export class NotionAPI {
 
       const reducersQuery = {};
       for (const group of groups) {
-        const {
-          property,
-          value: { value, type },
-        } = group;
+        if (!group.value) continue;
+
+        const property = group.property;
+        const value = group.value.value;
+        const type = group.value.type;
 
         for (const iterator of iterators) {
           const iteratorProps =
@@ -438,7 +441,6 @@ export class NotionAPI {
 
           const isUncategorizedValue = typeof value === 'undefined';
           const isDateValue = value?.range;
-          // TODO: review dates reducers
           const queryLabel = isUncategorizedValue
             ? 'uncategorized'
             : isDateValue
@@ -470,7 +472,7 @@ export class NotionAPI {
         }
       }
 
-      const reducerLabel = isBoardType ? 'board_columns' : `${type}_groups`;
+      const reducerLabel = `${type}_groups`;
       loader = {
         type: 'reducer',
         reducers: {
@@ -488,11 +490,6 @@ export class NotionAPI {
         ...collectionView?.query2,
         searchQuery,
         userTimeZone,
-        //TODO: add filters here
-        // filter: {
-        //   filters: filters,
-        //   operator: 'and'
-        // }
       };
     }
 
