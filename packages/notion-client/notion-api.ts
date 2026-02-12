@@ -10,7 +10,7 @@ import * as types from './types';
 // Some blocks/collections come as { value: { value: {...}, role: "..." } }
 function normalizeRecordMap(recordMap: notion.ExtendedRecordMap): void {
   for (const id in recordMap.block) {
-    const blockData = recordMap.block[id];
+    const blockData = recordMap.block[id] as any;
     if (blockData.value?.value) {
       recordMap.block[id] = {
         ...blockData,
@@ -20,7 +20,7 @@ function normalizeRecordMap(recordMap: notion.ExtendedRecordMap): void {
   }
 
   for (const id in recordMap.collection) {
-    const collectionData = recordMap.collection[id];
+    const collectionData = recordMap.collection[id] as any;
     if (collectionData.value?.value) {
       recordMap.collection[id] = {
         ...collectionData,
@@ -30,7 +30,7 @@ function normalizeRecordMap(recordMap: notion.ExtendedRecordMap): void {
   }
 
   for (const id in recordMap.collection_view) {
-    const viewData = recordMap.collection_view[id];
+    const viewData = recordMap.collection_view[id] as any;
     if (viewData.value?.value) {
       recordMap.collection_view[id] = {
         ...viewData,
