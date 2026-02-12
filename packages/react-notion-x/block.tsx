@@ -137,7 +137,7 @@ export const Block: React.FC<BlockProps> = props => {
           const isBlogPost = block?.type === 'page' && block?.parent_table === 'collection';
 
           const hasToc = showTableOfContents && toc.length >= minTableOfContentsItems;
-          const hasAside = !!(hasToc || pageAside);
+          const hasAside = (hasToc || pageAside) && !page_full_width;
           const hasPageCover = pageCover || page_cover;
 
           return (
@@ -171,7 +171,7 @@ export const Block: React.FC<BlockProps> = props => {
                       page_icon ? 'notion-page-has-icon' : 'notion-page-no-icon',
                       isPageIconUrl ? 'notion-page-has-image-icon' : 'notion-page-has-text-icon',
                       'notion-full-page',
-                      false && 'notion-full-width',
+                      page_full_width && 'notion-full-width',
                       page_small_text && 'notion-small-text',
                       bodyClassName,
                     )}
@@ -195,13 +195,13 @@ export const Block: React.FC<BlockProps> = props => {
                       <div
                         className={cs(
                           'notion-page-content',
-                          hasAside && 'notion-page-content-has-aside',
-                          hasToc && 'notion-page-content-has-toc',
+                          isBlogPost && hasAside && 'notion-page-content-has-aside',
+                          isBlogPost && hasToc && 'notion-page-content-has-toc',
                         )}
                       >
                         <article className="notion-page-content-inner">{children}</article>
 
-                        {hasAside && (
+                        {isBlogPost && hasAside && (
                           <PageAside
                             toc={toc}
                             activeSection={activeSection}
