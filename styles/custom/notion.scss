@@ -519,6 +519,32 @@ body {
 }
 
 /**
+ * ================ 데이터베이스 뷰 드롭다운 스타일 ================
+ */
+// 아이콘: 다크모드 대응 (하드코딩된 fill 대신 CSS 변수)
+.notion-collection-view-type-icon {
+  fill: var(--fg-color) !important;
+}
+
+// 드롭다운 메뉴: 폰트, 다크모드 배경/색상
+.notion-collection-view-dropdown-content {
+  font-family: var(--notion-font) !important;
+  background: var(--bg-color) !important;
+  border: 1px solid var(--fg-color-0);
+}
+
+.notion-collection-view-dropdown-content-item {
+  font-family: var(--notion-font) !important;
+  color: var(--fg-color) !important;
+  font-size: 14px;
+}
+
+.notion-collection-view-dropdown-content-item:focus,
+.notion-collection-view-dropdown-content-item-active {
+  background-color: var(--bg-color-0) !important;
+}
+
+/**
  * ================ notion 데이터베이스 뷰 (테이블, 보드) 너비 보정 ================
  */
 .notion {

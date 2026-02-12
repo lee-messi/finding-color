@@ -249,13 +249,21 @@ const CollectionViewDropdownMenu: React.FC<{
   );
 };
 
+const viewTypeLabels: Record<string, string> = {
+  table: '테이블 뷰',
+  board: '보드 뷰',
+  gallery: '갤러리 뷰',
+  list: '리스트 뷰',
+  calendar: '캘린더 뷰',
+};
+
 const CollectionViewColumnDesc: React.FC<{
   collectionView: types.CollectionView;
   className?: string;
   children?: React.ReactNode;
 }> = ({ collectionView, className, children, ...rest }) => {
   const { type } = collectionView;
-  const name = collectionView.name || `${type[0].toUpperCase()}${type.slice(1)} view`;
+  const name = collectionView.name || viewTypeLabels[type] || `${type[0].toUpperCase()}${type.slice(1)} view`;
 
   return (
     <div className={cs('notion-collection-view-type', className)} {...rest}>
