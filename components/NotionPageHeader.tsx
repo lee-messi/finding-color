@@ -24,7 +24,7 @@ export const ToggleThemeButton = () => {
 
   return (
     <div
-      className={cs('breadcrumb', 'button', !hasMounted && styles.hidden)}
+      className={cs('breadcrumb', 'button', 'toggle-theme-btn', !hasMounted && styles.hidden)}
       onClick={onToggleTheme}
     >
       {hasMounted && isDarkMode ? <IoMoonSharp /> : <IoSunnyOutline />}
@@ -38,7 +38,17 @@ export const NotionPageHeader: React.FC<{
   const { components, mapPageUrl } = useNotionContext();
 
   if (navigationStyle === 'default') {
-    return <Header block={block} />;
+    return (
+      <header className="notion-header">
+        <div className="notion-nav-header">
+          <Breadcrumbs block={block} />
+          <div className="notion-nav-header-rhs breadcrumbs">
+            <ToggleThemeButton />
+            {isSearchEnabled && <Search block={block} title={null} />}
+          </div>
+        </div>
+      </header>
+    );
   }
 
   return (
