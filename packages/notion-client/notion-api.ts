@@ -8,7 +8,7 @@ import * as types from './types';
 
 // Normalize nested value structure from Notion API
 // Some blocks/collections come as { value: { value: {...}, role: "..." } }
-function normalizeRecordMap(recordMap: notion.ExtendedRecordMap): void {
+function normalizeRecordMap(recordMap: any): void {
   for (const id in recordMap.block) {
     const blockData = recordMap.block[id] as any;
     if (blockData.value?.value) {
