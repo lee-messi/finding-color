@@ -10,6 +10,8 @@ import { getCollectionGroups } from './collection-utils'
 import { Property } from './property'
 import { useNotionContext } from '../context'
 
+const defaultBlockIds = []
+
 export const CollectionViewBoard: React.FC<CollectionViewProps> = ({
   collection,
   collectionView,
@@ -65,12 +67,46 @@ function Board({ collectionView, collectionData, collection, padding }) {
     collectionView?.format?.board_groups2 ||
     []
 
+  const hasBoardData = !!(collectionData as any).board_columns?.results
+
   const boardStyle = React.useMemo(
     () => ({
       paddingLeft: padding
     }),
     [padding]
   )
+
+  // Fallback: when board_columns data is missing, render items as a card grid
+  if (!hasBoardData) {
+    const blockIds =
+      (collectionData as any)['collection_group_results']?.blockIds ||
+      (collectionData as any).blockIds ||
+      defaultBlockIds
+
+    return (
+      <div className='notion-board-fallback'>
+        <div className='notion-board-fallback-grid'>
+          {blockIds.map((blockId: string) => {
+            const block = recordMap.block[blockId]?.value as PageBlock
+            if (!block) return null
+
+            return (
+              <CollectionCard
+                className='notion-board-group-card'
+                collection={collection}
+                block={block}
+                cover={board_cover}
+                coverSize={board_cover_size}
+                coverAspect={board_cover_aspect}
+                properties={collectionView.format?.board_properties}
+                key={blockId}
+              />
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className='notion-board'>
@@ -84,10 +120,6 @@ function Board({ collectionView, collectionData, collection, padding }) {
         <div className='notion-board-header'>
           <div className='notion-board-header-inner'>
             {boardGroups.map((p, index) => {
-              if (!(collectionData as any).board_columns?.results) {
-                // no groupResults in the data when collection is in a toggle
-                return null
-              }
               const group = (collectionData as any).board_columns.results![
                 index
               ]
@@ -125,10 +157,6 @@ function Board({ collectionView, collectionData, collection, padding }) {
 
         <div className='notion-board-body'>
           {boardGroups.map((p, index) => {
-            if (!(collectionData as any).board_columns?.results) {
-              return null
-            }
-
             const schema = collection.schema[p.property]
             const group = (collectionData as any)[
               `results:select:${p?.value?.value || 'uncategorized'}`

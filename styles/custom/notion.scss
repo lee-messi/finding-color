@@ -553,6 +553,19 @@ body {
   .notion-board-view {
     padding-left: 0 !important;
   }
+
+  // 보드 뷰 - board_columns 데이터 없을 때 카드 그리드 fallback
+  .notion-board-fallback-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 8px 0;
+
+    .notion-board-group-card {
+      width: 260px;
+      flex-shrink: 0;
+    }
+  }
 }
 
 /**

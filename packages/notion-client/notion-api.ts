@@ -373,21 +373,8 @@ export class NotionAPI {
   ) {
     const type = collectionView?.type;
     const isBoardType = type === 'board';
-    let groupBy =
-      collectionView?.format?.board_columns_by ||
-      collectionView?.format?.board_column_by ||
-      collectionView?.format?.collection_group_by;
-
-    // For board views, derive groupBy from board_columns if not explicitly set
-    if (!groupBy && isBoardType) {
-      const boardColumns =
-        collectionView?.format?.board_columns ||
-        collectionView?.format?.board_groups2 ||
-        [];
-      if (boardColumns.length > 0 && boardColumns[0]?.property) {
-        groupBy = boardColumns[0].property;
-      }
-    }
+    const groupBy =
+      collectionView?.format?.board_columns_by || collectionView?.format?.collection_group_by;
 
     let loader: any = {
       type: 'reducer',
@@ -430,7 +417,6 @@ export class NotionAPI {
 
       const reducersQuery = {};
       for (const group of groups) {
-        if (!group?.value) continue;
         const {
           property,
           value: { value, type },
